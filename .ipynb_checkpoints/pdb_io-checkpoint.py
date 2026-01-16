@@ -1,8 +1,10 @@
 from atom import Atom
 from residue import Residue, create_res_id
+from chain import Chain
 
 def read_pdb(filename):
-    residues = []
+    chains = {}
+    residues = {}
     curr_residues = None
     with open(filename) as f:
         for line in f:
@@ -15,18 +17,17 @@ def read_pdb(filename):
 
                 atom_res_id = create_res_id(atom.resname, atom.resnum, atom.chain)
                 
-                if curr_residues is None or curr_residues.id != atom_res_id:
+                if atom.chain not in chains:
+                    chains[atom.chain] = Chain(atom.chain)
+                if atom_res_id not in residues:
                     residue = Residue()
                     residue.set_data(line)
-                    residue.atoms.append(atom)
-                    curr_residues = residue
-                    residues.append(residue)
-                    print(line)
-                else:
-                    curr_residues.atoms.append(atom)                  
+                    residues[atom_res_id] = residue
+                    chains[atom.chain].add_residue(residue)
+                residues[atom_res_id].atoms.append(atom)
 
-
-    return residues
+    return chains
+            
 
                 
                 
